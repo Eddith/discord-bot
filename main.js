@@ -1,13 +1,17 @@
-const { Client, Collection, Intents } = require("discord.js"); // Discord.js
-require('dotenv').config(); // Load .env file
+const Discord = require("discord.js"); // Discord.js
+require("dotenv").config(); // Load .env file
 
-const client = new Client({ intents: [Intents.FLAGS.GUILDS] }); // Create new client
+// Create new client
 
-const prefix = "-";
+const client = new Discord.Client({
+  intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES],
+}); 
+
+const prefix = "-"; // Prefix for commands
 
 const fs = require("fs");
 
-client.commands = new Collection();  // Create new collection for commands
+client.commands = new Discord.Collection(); // Create new collection for commands
 
 const commandFiles = fs
   .readdirSync("./commands")
@@ -18,22 +22,32 @@ for (const file of commandFiles) {
   client.commands.set(command.name, command);
 }
 
-client.on("ready", () => {
+// Bot is all ready
+
+client.on("ready", () => { 
   console.log(`${client.user.username} is online!`);
 });
 
-client.on("messageCreate", (message) => { // When a message is created
+// When a message is created
+
+client.on("messageCreate", (message) => { 
+
   if (!message.content.startsWith(prefix) || message.author.bot) return;
 
   const args = message.content.slice(prefix.length).split(/ +/);
   const command = args.shift().toLowerCase();
 
-  if (command === "ping") {
-    client.commands.get("ping").execute(message, args);
-  } else if (command === "youtube") {
-    client.commands.get("youtube").execute(message, args);
+  if (command === "youtube") {
+    client.commands.get('youtube').execute(message, args);
+  } else if(command === 'poseidon') {
+    client.commands.get('poseidon').execute(message, args, Discord);
   }
 });
 
+// When a warning is thrown
+
+client.on('warning', (warning) => {  
+  console.log(warning.stack);
+});
 
 client.login(process.env.TOKEN);
